@@ -702,11 +702,12 @@ def voice_booking(request: schemas.VoiceBookingRequest, current_user: models.Use
             "scheduled_date": None,
             "job_details": None
         }
- 
- #   S e r v e   s t a t i c   f r o n t e n d   f i l e s   f r o m   p r o d u c t i o n   b u i l d  
- f r o n t e n d _ d i s t   =   o s . p a t h . j o i n ( o s . p a t h . d i r n a m e ( _ _ f i l e _ _ ) ,   ' . . ' ,   ' f r o n t e n d _ d i s t ' )  
- i f   o s . p a t h . e x i s t s ( f r o n t e n d _ d i s t ) :  
-         a p p . m o u n t ( ' / ' ,   S t a t i c F i l e s ( d i r e c t o r y = f r o n t e n d _ d i s t ,   h t m l = T r u e ) ,   n a m e = ' f r o n t e n d ' )  
-         p r i n t ( f ' F r o n t e n d   f i l e s   m o u n t e d   f r o m   { f r o n t e n d _ d i s t } ' )  
- e l s e :  
- 
+
+# Serve static frontend files from production build
+frontend_dist = os.path.join(os.path.dirname(__file__), '..', 'frontend_dist')
+if os.path.exists(frontend_dist):
+    app.mount('/', StaticFiles(directory=frontend_dist, html=True), name='frontend')
+    print(f'Frontend files mounted from {frontend_dist}')
+else:
+    # Frontend production build not found; continue without mounting static files
+    print(f'No frontend production build found at {frontend_dist}. Skipping static mount.')
