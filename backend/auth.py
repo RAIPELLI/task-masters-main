@@ -1,3 +1,4 @@
+import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
 from jose import JWTError, jwt
@@ -16,10 +17,14 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+    # Hash with SHA256 first to handle passwords longer than bcrypt's 72-byte limit
+    sha256_hash = hashlib.sha256(plain_password.encode()).hexdigest()
+    return pwd_context.verify(sha256_hash, hashed_password)
 
 def get_password_hash(password):
-    return pwd_context.hash(password)
+    # Hash with SHA256 first to ensure bcrypt never receives more than 72 bytes
+    sha256_hash = hashlib.sha256(password.encode()).hexdigest()
+    return pwd_context.hash(sha256_hash)
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
